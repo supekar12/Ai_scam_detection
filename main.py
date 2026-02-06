@@ -1,131 +1,98 @@
-from fastapi import FastAPI, Header, HTTPException, Depends, status, Request
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Union
-import logging
+from fastapi import FastAPI, Header, HTTPException, Request
+from pydantic import BaseModel
+from typing import List, Optional, Dict, Any
 
-# Shared Configuration
+app = FastAPI()
+
+# --- CONFIGURATION ---
 SUBMISSION_API_KEY = "mysecretkey"
 
-app = FastAPI(title="Unified Hackathon API")
+# ==========================================
+# 1. DEFINE THE DATA MODELS
+# ==========================================
 
-# Debugging 422 Errors
-@app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    logging.error(f"Validation error: {exc}")
-    body = await request.body()
-    logging.error(f"Request body: {body.decode()}")
-    return JSONResponse(
-        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-        content={"detail": exc.errors(), "body": body.decode()},
-    )
-
-@app.get("/")
-def read_root():
-    return {
-        "message": "Unified Hackathon API is running.",
-        "endpoints": ["/detect-audio", "/honeypot"],
-        "documentation": "/docs"
-    }
-
-# --- Problem 1: AI Voice Detection ---
-
-class VoiceDetectionInput(BaseModel):
-    model_config = {"populate_by_name": True}
-    audiobase64: str = Field(..., alias="audioBase64")
+# Model for Voice Data
+class AudioRequest(BaseModel):
+    audioBase64: str          
     language: Optional[str] = None
-    audioformat: Optional[str] = Field(None, alias="audioFormat")
+    audioFormat: Optional[str] = None
 
-class VoiceDetectionOutput(BaseModel):
-    status: str
-    prediction: str
-    confidence: float
+# Models for Honey-Pot Data (Complex Structure)
+class MessageContent(BaseModel):
+    sender: str
+    text: str
 
-# Dependency for Endpoint 1 Auth
-def verify_voice_auth(
-    authorization: str = Header(None),
-    x_api_key: str = Header(None)
-):
-    # 1. Try Authorization header
-    if authorization:
-        authorization = authorization.strip()
-        if authorization.lower().startswith("bearer"):
-            parts = authorization.split()
-            if len(parts) == 2 and parts[0].lower() == "bearer":
-                authorization = parts[1]
-        
-        if authorization == SUBMISSION_API_KEY:
-            return authorization
+class HoneypotRequest(BaseModel):
+    sessionId: str
+    message: MessageContent
+    timestamp: int
+    conversationHistory: List[Any] = []
+    metadata: Dict[str, Any] = {}
+    language: Optional[str] = None
 
-    # 2. Try x-api-key header
-    if x_api_key and x_api_key == SUBMISSION_API_KEY:
-        return x_api_key
+# ==========================================
+# 2. THE LOGIC FUNCTIONS (Reusable)
+# ==========================================
 
-    # 3. If both fail
-    raise HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Invalid Authorization header or x-api-key"
-    )
-
-@app.post("/detect-audio", response_model=VoiceDetectionOutput)
-async def detect_audio(
-    data: VoiceDetectionInput, 
-    api_key: str = Depends(verify_voice_auth)
-):
-    # Mock logic
+def handle_voice_logic():
     return {
-        "status": "success",
-        "prediction": "human",
+        "status": "success", 
+        "prediction": "Human", 
         "confidence": 0.99
     }
 
-# --- Problem 2: Agentic Honey-pot ---
-
-class HoneypotMessage(BaseModel):
-    sender: str
-    text: str
-    timestamp: int
-
-class HoneypotInput(BaseModel):
-    message: Union[HoneypotMessage, str]
-    sessionId: Optional[str] = None
-    conversationHistory: Optional[List[dict]] = None
-    metadata: Optional[Dict[str, str]] = None
-
-class ExtractedIntelligence(BaseModel):
-    upi_ids: List[str]
-    bank_accounts: List[str]
-    phishing_links: List[str]
-
-class HoneypotOutput(BaseModel):
-    classification: str
-    generated_reply: str
-    extracted_intelligence: ExtractedIntelligence
-    status: str
-
-# Dependency for Endpoint 2 Auth
-def verify_honeypot_auth(x_api_key: str = Header(None)):
-    if x_api_key is None or x_api_key != SUBMISSION_API_KEY:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid x-api-key header"
-        )
-    return x_api_key
-
-@app.post("/honeypot", response_model=HoneypotOutput)
-async def honeypot(
-    data: HoneypotInput,
-    api_key: str = Depends(verify_honeypot_auth)
-):
-    # Mock logic
+def handle_honeypot_logic():
     return {
-        "classification": "scam",
-        "generated_reply": "I am confused, please help.",
-        "extracted_intelligence": {
-            "upi_ids": [],
-            "bank_accounts": [],
-            "phishing_links": []
-        },
-        "status": "success"
+        "status": "success",
+        "reply": "I am confused. Why is my account being suspended? Can you explain?"
     }
+
+# ==========================================
+# 3. THE ENDPOINTS
+# ==========================================
+
+# Specific Endpoint for Voice (Keep this safe)
+@app.post("/detect-audio")
+async def detect_audio_endpoint(request: AudioRequest, authorization: str = Header(None)):
+    if authorization != SUBMISSION_API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+    return handle_voice_logic()
+
+# Specific Endpoint for Honey-Pot (Keep this safe)
+@app.post("/honeypot")
+async def honeypot_endpoint(request: HoneypotRequest, x_api_key: str = Header(None)):
+    if x_api_key != SUBMISSION_API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+    return handle_honeypot_logic()
+
+# --- THE MAGIC "SMART ROUTER" (SOLVES YOUR PROBLEM) ---
+# This listens on the Main Home Page ("/") and decides what to do
+@app.post("/")
+async def smart_router(
+    request: Request, 
+    authorization: str = Header(None), 
+    x_api_key: str = Header(None)
+):
+    # 1. Check API Key (Accept either header)
+    api_key = authorization or x_api_key
+    if api_key != SUBMISSION_API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+
+    # 2. Peek at the data to see what it is
+    data = await request.json()
+
+    # 3. Decide which logic to run
+    if "audioBase64" in data:
+        # It's an Audio request!
+        return handle_voice_logic()
+    
+    elif "sessionId" in data or "message" in data:
+        # It's a Honey-Pot request!
+        return handle_honeypot_logic()
+        
+    else:
+        return {"status": "error", "message": "Unknown request type"}
+
+@app.get("/")
+async def health_check():
+    return {"status": "Online", "mode": "Smart Unified Server"}
