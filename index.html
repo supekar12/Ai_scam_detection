@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FraudGuard AI | Multi-Modal Detection</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Glassmorphism & Custom Styles */
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            min-height: 100vh;
+            color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-sidebar {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(16px);
+            border-right: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-item.active {
+            background: rgba(99, 102, 241, 0.2);
+            border-left: 3px solid #818cf8;
+            color: #ffffff;
+        }
+
+        .input-glass {
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .input-glass:focus {
+            outline: none;
+            border-color: #818cf8;
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        /* Loading Spinner */
+        .loader {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top: 3px solid #818cf8;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="flex overflow-hidden">
+
+    <!-- Sidebar -->
+    <aside class="w-64 glass-sidebar h-screen flex-shrink-0 flex flex-col justify-between hidden md:flex">
+        <div>
+            <div class="p-6 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                        </path>
+                    </svg>
+                </div>
+                <h1 class="text-xl font-bold tracking-tight text-white">FraudGuard AI</h1>
+            </div>
+
+            <nav class="mt-4 px-2 space-y-1">
+                <button onclick="switchTab('sms')" id="nav-sms"
+                    class="nav-item w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white rounded-lg transition-all active">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z">
+                        </path>
+                    </svg>
+                    SMS Scanner
+                </button>
+                <button onclick="switchTab('email')" id="nav-email"
+                    class="nav-item w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white rounded-lg transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                    Email Shield
+                </button>
+                <button onclick="switchTab('image')" id="nav-image"
+                    class="nav-item w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white rounded-lg transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                    Deepfake Detector
+                </button>
+                <button onclick="switchTab('ai')" id="nav-ai"
+                    class="nav-item w-full flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-400 hover:text-white rounded-lg transition-all">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                    AI Text Checker
+                </button>
+            </nav>
+        </div>
+        <div class="p-4">
+            <div class="glass-panel p-3 rounded-lg flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="text-xs text-slate-400">System Status</p>
+                    <p class="text-sm font-semibold text-green-400">Operational</p>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 h-screen overflow-y-auto w-full">
+        <!-- Header -->
+        <header
+            class="h-16 flex items-center justify-between px-8 border-b border-gray-800 bg-slate-900/50 backdrop-blur-md sticky top-0 z-10">
+            <h2 id="page-title" class="text-lg font-semibold text-white">SMS Phishing Scanner</h2>
+            <div class="flex items-center gap-4">
+                <button class="p-2 text-slate-400 hover:text-white transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9">
+                        </path>
+                    </svg>
+                </button>
+                <div
+                    class="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 border border-white/20">
+                </div>
+            </div>
+        </header>
+
+        <!-- Dynamic Content Area -->
+        <div class="p-8 max-w-5xl mx-auto">
+
+            <!-- SMS Section -->
+            <div id="section-sms" class="fade-in block">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- Input -->
+                    <div class="glass-panel rounded-xl p-6">
+                        <h3 class="text-lg font-medium mb-4 flex items-center gap-2">
+                            <span class="text-indigo-400">INPUT</span>
+                            Analyze Message
+                        </h3>
+                        <div class="space-y-4">
+                            <textarea id="sms-input" rows="6"
+                                class="w-full input-glass rounded-lg p-4 text-sm placeholder-slate-500"
+                                placeholder="Paste the suspicious SMS here..."></textarea>
+                            <button onclick="analyzeSMS()"
+                                class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-lg transition-colors flex justify-center items-center gap-2">
+                                <span id="sms-btn-text">Scan Message</span>
+                                <div id="sms-loader" class="loader hidden"></div>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Result -->
+                    <div class="glass-panel rounded-xl p-6 flex flex-col items-center justify-center text-center min-h-[300px]"
+                        id="sms-result-container">
+                        <div class="text-slate-500">
+                            <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                                </path>
+                            </svg>
+                            <p>Results will appear here</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Section -->
+            <div id="section-email" class="fade-in hidden">
+                <div class="grid grid-cols-1 gap-8">
+                    <div class="glass-panel rounded-xl p-6">
+                        <h3 class="text-lg font-medium mb-4 text-indigo-400">Email Analysis</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                            <input id="email-sender" type="text" class="input-glass rounded-lg p-3 text-sm"
+                                placeholder="Sender (e.g., support@bank.com)">
+                            <input id="email-subject" type="text" class="input-glass rounded-lg p-3 text-sm"
+                                placeholder="Subject Line">
+                        </div>
+                        <textarea id="email-body" rows="8" class="w-full input-glass rounded-lg p-4 text-sm mb-4"
+                            placeholder="Paste email body content..."></textarea>
+                        <button onclick="analyzeEmail()"
+                            class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-lg transition-colors flex justify-center items-center gap-2">
+                            <span id="email-btn-text">Analyze Email</span>
+                            <div id="email-loader" class="loader hidden"></div>
+                        </button>
+                    </div>
+
+                    <div id="email-result-container" class="hidden">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Section -->
+            <div id="section-image" class="fade-in hidden">
+                <div class="max-w-2xl mx-auto text-center">
+                    <div class="glass-panel rounded-xl p-10 border-dashed border-2 border-indigo-500/30 hover:border-indigo-500 transition-colors cursor-pointer relative"
+                        id="drop-zone">
+                        <input type="file" id="image-input"
+                            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" accept="image/*"
+                            onchange="handleImageSelect(this)">
+                        <div class="pointer-events-none" id="upload-placeholder">
+                            <svg class="w-12 h-12 text-indigo-400 mx-auto mb-4" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                                </path>
+                            </svg>
+                            <p class="text-lg font-medium text-white">Drop image or click to upload</p>
+                            <p class="text-sm text-slate-400 mt-2">Supports JPG, PNG, WEBP</p>
+                        </div>
+                        <div id="upload-preview" class="hidden">
+                            <img id="preview-img" class="max-h-64 mx-auto rounded-lg shadow-lg mb-4">
+                            <p id="filename-display" class="text-sm text-slate-300"></p>
+                        </div>
+                    </div>
+
+                    <button onclick="analyzeImage()"
+                        class="mt-6 w-full max-w-xs bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-lg transition-colors inline-flex justify-center items-center gap-2">
+                        <span id="img-btn-text">Detect Deepfake</span>
+                        <div id="img-loader" class="loader hidden"></div>
+                    </button>
+
+                    <div id="image-result-container" class="mt-8 hidden">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Text Section -->
+            <div id="section-ai" class="fade-in hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="glass-panel rounded-xl p-6">
+                        <h3 class="text-lg font-medium mb-4 text-indigo-400">Content Checker</h3>
+                        <textarea id="ai-input" rows="12" class="w-full input-glass rounded-lg p-4 text-sm mb-4"
+                            placeholder="Paste article or essay text here to check for AI generation..."></textarea>
+                        <button onclick="analyzeAiText()"
+                            class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-2.5 rounded-lg transition-colors flex justify-center items-center gap-2">
+                            <span id="ai-btn-text">Check Authorship</span>
+                            <div id="ai-loader" class="loader hidden"></div>
+                        </button>
+                    </div>
+
+                    <div class="glass-panel rounded-xl p-6 flex flex-col justify-center" id="ai-result-container">
+                        <div class="text-center text-slate-500">
+                            <svg class="w-16 h-16 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                    d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z">
+                                </path>
+                            </svg>
+                            <p>Analysis Result</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        const API_URL = ""; // Relative path for production & local
+
+
+        // Navigation
+        function switchTab(tabId) {
+            // Update Sidebar
+            document.querySelectorAll('.nav-item').forEach(el => {
+                el.classList.remove('active', 'text-white');
+                el.classList.add('text-slate-400');
+            });
+            document.getElementById(`nav-${tabId}`).classList.add('active', 'text-white');
+            document.getElementById(`nav-${tabId}`).classList.remove('text-slate-400');
+
+            // Update Headings
+            const titles = {
+                'sms': 'SMS Phishing Scanner',
+                'email': 'Email Shield',
+                'image': 'Deepfake Detector',
+                'ai': 'AI Text Authorship'
+            };
+            document.getElementById('page-title').textContent = titles[tabId];
+
+            // Show Section
+            ['sms', 'email', 'image', 'ai'].forEach(id => {
+                document.getElementById(`section-${id}`).classList.add('hidden');
+                document.getElementById(`section-${id}`).classList.remove('block');
+            });
+            const activeSection = document.getElementById(`section-${tabId}`);
+            activeSection.classList.remove('hidden');
+            activeSection.classList.add('block', 'fade-in');
+        }
+
+        // --- SMS SCANNER ---
+        async function analyzeSMS() {
+            const text = document.getElementById('sms-input').value;
+            if (!text) return;
+
+            setLoading('sms', true);
+
+            try {
+                const response = await fetch(`${API_URL}/detect-sms`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text })
+                });
+                const data = await response.json();
+
+                // Display Result
+                const container = document.getElementById('sms-result-container');
+                const isPhishing = data.is_phishing;
+                const colorClass = isPhishing ? 'text-red-400' : 'text-emerald-400';
+                const bgClass = isPhishing ? 'bg-red-500/10' : 'bg-emerald-500/10';
+                const icon = isPhishing
+                    ? `<svg class="w-12 h-12 mb-2 ${colorClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`
+                    : `<svg class="w-12 h-12 mb-2 ${colorClass}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>`;
+
+                container.innerHTML = `
+                    <div class="${bgClass} p-6 rounded-full inline-flex self-center mb-4">
+                        ${icon}
+                    </div>
+                    <h2 class="text-2xl font-bold ${colorClass} mb-2">${isPhishing ? "PHISHING DETECTED" : "SAFE MESSAGE"}</h2>
+                    <p class="text-gray-300 mb-4">${data.explanation}</p>
+                    <div class="w-full bg-gray-700 rounded-full h-2.5 mb-2 max-w-xs mx-auto">
+                        <div class="bg-indigo-500 h-2.5 rounded-full" style="width: ${data.probability * 100}%"></div>
+                    </div>
+                    <span class="text-sm text-gray-400">Risk Score: ${(data.probability * 100).toFixed(1)}%</span>
+                `;
+
+            } catch (e) {
+                console.error(e);
+                alert("Error connecting to API");
+            } finally {
+                setLoading('sms', false);
+            }
+        }
+
+        // --- EMAIL SHIELD ---
+        async function analyzeEmail() {
+            setLoading('email', true);
+            const sender = document.getElementById('email-sender').value;
+            const subject = document.getElementById('email-subject').value;
+            const body = document.getElementById('email-body').value;
+
+            try {
+                const response = await fetch(`${API_URL}/detect-email`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ sender, subject, body })
+                });
+                const data = await response.json();
+
+                const container = document.getElementById('email-result-container');
+                container.classList.remove('hidden');
+
+                const isScam = data.verdict === "SCAM";
+                container.innerHTML = `
+                    <div class="glass-panel p-6 rounded-xl border-l-4 ${isScam ? 'border-red-500' : 'border-green-500'}">
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <h4 class="text-xl font-bold text-white mb-1">Verdict: <span class="${isScam ? 'text-red-400' : 'text-green-400'}">${data.verdict}</span></h4>
+                                <p class="text-slate-300">${data.analysis}</p>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-3xl font-bold text-white">${(data.scam_score * 100).toFixed(0)}</span>
+                                <span class="text-sm text-slate-400 block">Risk Score</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+            } catch (e) {
+                alert("Error connecting to API");
+            } finally {
+                setLoading('email', false);
+            }
+        }
+
+        // --- IMAGE DEEPFAKE ---
+        function handleImageSelect(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('preview-img').src = e.target.result;
+                    document.getElementById('upload-placeholder').classList.add('hidden');
+                    document.getElementById('upload-preview').classList.remove('hidden');
+                    document.getElementById('filename-display').textContent = input.files[0].name;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        async function analyzeImage() {
+            const input = document.getElementById('image-input');
+            if (!input.files[0]) return;
+
+            setLoading('img', true);
+            const formData = new FormData();
+            formData.append('file', input.files[0]);
+
+            try {
+                const response = await fetch(`${API_URL}/detect-image`, {
+                    method: "POST",
+                    body: formData
+                });
+                const data = await response.json();
+
+                const container = document.getElementById('image-result-container');
+                container.classList.remove('hidden');
+
+                const isFake = data.is_deepfake;
+                container.innerHTML = `
+                     <div class="glass-panel p-8 rounded-xl text-center">
+                        <div class="inline-block p-4 rounded-full ${isFake ? 'bg-red-500/20 text-red-400' : 'bg-green-500/20 text-green-400'} mb-4">
+                            <span class="text-3xl font-bold">${isFake ? 'FAKE' : 'REAL'}</span>
+                        </div>
+                        <p class="text-xl text-white mb-2">Confidence: ${(data.confidence * 100).toFixed(1)}%</p>
+                        <p class="text-slate-400">${data.metadata_check}</p>
+                     </div>
+                `;
+
+            } catch (e) {
+                alert("Error");
+            } finally {
+                setLoading('img', false);
+            }
+        }
+
+        // --- AI TEXT ---
+        async function analyzeAiText() {
+            setLoading('ai', true);
+            const text = document.getElementById('ai-input').value;
+
+            try {
+                const response = await fetch(`${API_URL}/detect-ai-text`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ text })
+                });
+                const data = await response.json();
+
+                const container = document.getElementById('ai-result-container');
+                const isAi = data.is_ai_generated;
+
+                container.innerHTML = `
+                    <div class="text-center">
+                        <div class="w-32 h-32 rounded-full border-4 ${isAi ? 'border-purple-500' : 'border-blue-400'} flex items-center justify-center mx-auto mb-6 relative">
+                            <span class="text-2xl font-bold text-white">${(data.confidence * 100).toFixed(0)}%</span>
+                            <span class="absolute -bottom-8 text-sm text-slate-400">${isAi ? 'AI Probability' : 'Human Probability'}</span>
+                        </div>
+                        <h3 class="text-2xl font-bold text-white mb-2">${isAi ? 'AI GENERATED' : 'HUMAN WRITTEN'}</h3>
+                        <p class="text-slate-300 max-w-sm mx-auto">${data.details}</p>
+                    </div>
+                `;
+
+            } catch (e) {
+                console.log(e);
+            } finally {
+                setLoading('ai', false);
+            }
+        }
+
+        // Helper
+        function setLoading(prefix, isLoading) {
+            const btnText = document.getElementById(`${prefix}-btn-text`);
+            const loader = document.getElementById(`${prefix}-loader`);
+            if (isLoading) {
+                btnText.classList.add('hidden');
+                loader.classList.remove('hidden');
+            } else {
+                btnText.classList.remove('hidden');
+                loader.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+
+</html>
