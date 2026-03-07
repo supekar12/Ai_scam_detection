@@ -8,7 +8,7 @@
     <!-- Tailwind CSS injected directly via CDN for rapid deployment -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Modern micro-animations for enterprise UX */
+        /* Modern micro-animations for UX */
         .fade-in {
             animation: fadeIn 0.4s ease-out forwards;
         }
@@ -60,7 +60,7 @@
 </head>
 
 <body
-    class="bg-gradient-to-br from-slate-50 to-indigo-50 min-h-screen font-sans antialiased text-slate-800 flex overflow-hidden">
+    class="bg-gradient-to-br from-slate-50 to-indigo-50 h-screen font-sans antialiased text-slate-800 flex overflow-hidden">
 
     <!-- Sidebar Dashboard Layout -->
     <aside
@@ -101,11 +101,11 @@
         </nav>
 
         <div class="p-6 border-t border-indigo-50 bg-slate-50/50">
-            <p class="text-xs text-slate-400">Detection Engine v2.0.0<br>Rules-Based System</p>
+            <p class="text-xs text-slate-400">Detection Engine v3.0.0<br>Rules-Based System</p>
         </div>
     </aside>
 
-    <!-- Mobile Header (Visible only on small screens) -->
+    <!-- Mobile Header -->
     <header
         class="md:hidden bg-indigo-900 w-full py-4 px-6 shadow-md flex justify-between items-center fixed top-0 z-20">
         <div class="flex items-center gap-2">
@@ -138,14 +138,14 @@
                     class="bg-white rounded-3xl shadow-xl shadow-indigo-100 p-8 relative overflow-hidden border border-white">
                     <div class="mb-8">
                         <h2 class="text-3xl font-bold text-indigo-950 mb-2">SMS & Chat Scanner</h2>
-                        <p class="text-slate-500">Check your text messages for urgent warnings, dangerous links, and
-                            suspicious formatting.</p>
+                        <p class="text-slate-500">Check your text messages for urgent warnings, dangerous links, OTP
+                            scams, and suspicious tracking issues.</p>
                     </div>
 
                     <form id="sms-form" class="space-y-6">
                         <textarea id="sms-input" rows="5"
                             class="w-full bg-slate-50 border border-indigo-100 rounded-2xl p-5 text-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all resize-none text-lg"
-                            placeholder="Paste suspicious SMS here...&#10;(e.g., URGENT: Your SBI account is blocked! Verify at http://spam.com)"
+                            placeholder="Paste suspicious SMS here...&#10;(e.g., URGENT: Your packet is suspended! Verify at http://spam.com)"
                             required></textarea>
 
                         <button type="submit" id="sms-submit-btn"
@@ -161,11 +161,9 @@
                 <div
                     class="bg-white rounded-3xl shadow-xl shadow-indigo-100 p-8 relative overflow-hidden border border-white">
                     <div class="mb-8">
-                        <div class="flex items-center gap-3 mb-2">
-                            <h2 class="text-3xl font-bold text-indigo-950">Email Shield</h2>
-                        </div>
-                        <p class="text-slate-500">Check business and personal emails. We look for fake sender addresses,
-                            dangerous links, and common scam words.</p>
+                        <h2 class="text-3xl font-bold text-indigo-950">Email Shield</h2>
+                        <p class="text-slate-500">Check business and personal emails for Job Bait, fake authorities, and
+                            Pay-to-Play Internships.</p>
                     </div>
 
                     <form id="email-form" class="space-y-5">
@@ -174,13 +172,13 @@
                                 <label class="block text-sm font-bold text-indigo-900 mb-2">Sender Address</label>
                                 <input type="email" id="email-sender"
                                     class="w-full bg-slate-50 border border-indigo-100 rounded-xl p-3 text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                    placeholder="e.g. security@sbi-updates.com" required>
+                                    placeholder="e.g. hr@fake-company.com" required>
                             </div>
                             <div>
                                 <label class="block text-sm font-bold text-indigo-900 mb-2">Subject Line</label>
                                 <input type="text" id="email-subject"
                                     class="w-full bg-slate-50 border border-indigo-100 rounded-xl p-3 text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                    placeholder="e.g. ACTION REQUIRED: Account Restricted">
+                                    placeholder="e.g. Shortlisted for Internship">
                             </div>
                         </div>
                         <div>
@@ -269,52 +267,42 @@
     <script>
         // --- 1. Tab Switching Logic ---
         function switchTab(tabId, btnElement) {
-            // Hide all tabs
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            // Display targeted tab
             document.getElementById(tabId).classList.add('active');
 
-            // Reset desktop sidebar buttons
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-bold');
                 btn.classList.add('text-slate-500', 'hover:bg-slate-50', 'font-medium');
             });
 
-            // Reset mobile header buttons
             document.querySelectorAll('.tab-btn-mobile').forEach(btn => {
                 btn.classList.remove('bg-indigo-600', 'text-white', 'ring-2', 'ring-indigo-400');
                 btn.classList.add('bg-indigo-800', 'text-indigo-200');
             });
 
-            // Highlight active button (Desktop)
             if (btnElement.classList.contains('tab-btn')) {
                 btnElement.classList.remove('text-slate-500', 'hover:bg-slate-50', 'font-medium');
                 btnElement.classList.add('bg-indigo-50', 'text-indigo-700', 'font-bold');
 
-                // Keep mobile synced
                 const mobileBtns = document.querySelectorAll('.tab-btn-mobile');
                 if (tabId === 'sms-tab-content') { mobileBtns[0].classList.add('bg-indigo-600', 'text-white', 'ring-2', 'ring-indigo-400'); mobileBtns[0].classList.remove('bg-indigo-800', 'text-indigo-200'); }
                 if (tabId === 'email-tab-content') { mobileBtns[1].classList.add('bg-indigo-600', 'text-white', 'ring-2', 'ring-indigo-400'); mobileBtns[1].classList.remove('bg-indigo-800', 'text-indigo-200'); }
             }
 
-            // Highlight active button (Mobile)
             if (btnElement.classList.contains('tab-btn-mobile')) {
                 btnElement.classList.remove('bg-indigo-800', 'text-indigo-200');
                 btnElement.classList.add('bg-indigo-600', 'text-white', 'ring-2', 'ring-indigo-400');
 
-                // Keep desktop synced
                 const desktopBtns = document.querySelectorAll('.tab-btn');
                 if (tabId === 'sms-tab-content') { desktopBtns[0].classList.add('bg-indigo-50', 'text-indigo-700', 'font-bold'); desktopBtns[0].classList.remove('text-slate-500', 'hover:bg-slate-50', 'font-medium'); }
                 if (tabId === 'email-tab-content') { desktopBtns[1].classList.add('bg-indigo-50', 'text-indigo-700', 'font-bold'); desktopBtns[1].classList.remove('text-slate-500', 'hover:bg-slate-50', 'font-medium'); }
             }
 
-            // Hide results on tab switch
             document.getElementById('results-area').classList.add('hidden');
         }
 
         // --- 2. API Submission Architecture ---
 
-        // Helper function for UI states
         const setProcessingState = (isLoading) => {
             const loadingEl = document.getElementById('loading');
             const resultsEl = document.getElementById('results-area');
@@ -331,17 +319,14 @@
             }
         };
 
-        // Render routine for API Response
         const renderResults = (data) => {
             document.getElementById('status-text').textContent = data.status;
             document.getElementById('score-text').innerHTML = `${data.risk_score}<span class="text-3xl opacity-50">/100</span>`;
 
-            // Progress Bar Animation
             const scoreBar = document.getElementById('score-bar');
             scoreBar.style.width = '0%';
             setTimeout(() => { scoreBar.style.width = `${data.risk_score}%`; }, 50);
 
-            // Dynamic Styling
             const resultBox = document.getElementById('result-box');
             resultBox.className = 'rounded-3xl p-8 transition-colors duration-500 border relative overflow-hidden shadow-2xl';
 
@@ -353,7 +338,6 @@
                 resultBox.classList.add('bg-rose-50', 'text-rose-900', 'border-rose-200', 'shadow-rose-100');
             }
 
-            // Populating Lists
             const renderList = (arrayData, listId, emptyId) => {
                 const listEl = document.getElementById(listId);
                 const emptyEl = document.getElementById(emptyId);
@@ -379,17 +363,17 @@
 
         // --- Event Listeners ---
 
-        // SMS Handler
+        // SMS Handler sending type="sms"
         document.getElementById('sms-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const payloadText = document.getElementById('sms-input').value;
             setProcessingState(true);
 
             try {
-                const response = await fetch('/detect-sms', {
+                const response = await fetch('/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ text: payloadText })
+                    body: JSON.stringify({ text: payloadText, type: "sms" })
                 });
                 if (!response.ok) throw new Error('Network Error');
                 const data = await response.json();
@@ -401,19 +385,23 @@
             }
         });
 
-        // Email Handler
+        // Email Handler sending combined text and type="email"
         document.getElementById('email-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const sender = document.getElementById('email-sender').value;
             const subject = document.getElementById('email-subject').value;
             const body = document.getElementById('email-body').value;
+
+            // Combine fields to send to the unified engine
+            const combinedText = `Email Sender: ${sender}\nEmail Subject: ${subject}\n\n${body}`;
+
             setProcessingState(true);
 
             try {
-                const response = await fetch('/detect-email', {
+                const response = await fetch('/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sender, subject, body })
+                    body: JSON.stringify({ text: combinedText, type: "email" })
                 });
                 if (!response.ok) throw new Error('Network Error');
                 const data = await response.json();
