@@ -160,6 +160,15 @@ def analyze_email(text: str) -> dict:
         if "Cryptocurrency Fraud" not in threat_categories:
             threat_categories.append("Cryptocurrency Fraud")
             
+    # 3.10 Romance & Advance Fee Fraud (+50 pts)
+    # Long-form emotional manipulation and advance fee (419) formats
+    romance_keywords = ["refugee camp", "peacekeeping mission", "diplomatic courier", "leave processing", "fixed deposit account", "widow", "soulmate", "destined by god"]
+    if any(kw in lower_text for kw in romance_keywords):
+        score += 50
+        flags_found.append("Advanced Fee / Romance / Military Scam format detected")
+        if "Advance Fee Fraud" not in threat_categories:
+            threat_categories.append("Advance Fee Fraud")
+            
     # Resolution State
     score = min(score, 100)
     
@@ -252,7 +261,47 @@ def analyze_sms(text: str) -> dict:
         if "Marathi SMS Scams" not in threat_categories:
             threat_categories.append("Marathi SMS Scams")
             
-    # 4.7 Contextual Mismatch: Urgency without specifics (+35 pts)
+    # 4.7 Romance & Military Impersonation (+45 pts)
+    romance_keywords = ["peacekeeping mission", "diplomatic courier", "satellite phone", "itunes gift cards", "leave processing", "widow"]
+    if any(kw in lower_text for kw in romance_keywords):
+        score += 45
+        flags_found.append("Romance / Military Impersonation scam detected")
+        if "Romance / Military Scam" not in threat_categories:
+            threat_categories.append("Romance / Military Scam")
+
+    # 4.8 Fake Job & Task Scams (+45 pts)
+    job_keywords = ["remote task role", "rate hotels", "earn daily income", "online interview", "received your resume"]
+    if any(kw in lower_text for kw in job_keywords):
+        score += 45
+        flags_found.append("Fake Recruiter / Task Scam detected")
+        if "Fake Job Offer" not in threat_categories:
+            threat_categories.append("Fake Job Offer")
+            
+    # 4.9 Prize & Giveaway Scams (+40 pts)
+    prize_keywords = ["amazon gift card", "loyalty gift", "claim your prize", "won a ", "rewarding our very best"]
+    if any(kw in lower_text for kw in prize_keywords):
+        score += 40
+        flags_found.append("Extremely common Prize / Giveaway bait detected")
+        if "Prize Scam" not in threat_categories:
+            threat_categories.append("Prize Scam")
+            
+    # 4.10 Fake Billing, Utilities & Subscriptions (+40 pts)
+    billing_keywords = ["electricity service", "disconnected due to non-payment", "process your refund", "subscription will auto-renew", "outstanding debt"]
+    if any(kw in lower_text for kw in billing_keywords):
+        score += 40
+        flags_found.append("Fake Billing / Utility disconnection threat")
+        if "Fake Billing/Collections" not in threat_categories:
+            threat_categories.append("Fake Billing/Collections")
+            
+    # 4.11 Govt & Tax Impersonation (+50 pts)
+    tax_keywords = ["irs notice", "outstanding tax", "student loan forgiveness"]
+    if any(kw in lower_text for kw in tax_keywords):
+        score += 50
+        flags_found.append("Government Identity Impersonation (IRS/Loans)")
+        if "Govt Impersonation" not in threat_categories:
+            threat_categories.append("Govt Impersonation")
+
+    # 4.12 Contextual Mismatch: Urgency without specifics (+35 pts)
     # Modern SMS scams say "Action required" but give no context before the link
     words = text.split()
     if len(words) < 15 and has_url:
@@ -263,7 +312,7 @@ def analyze_sms(text: str) -> dict:
             if "Phishing Link Dissemination" not in threat_categories:
                 threat_categories.append("Phishing Link Dissemination")
 
-    # 4.8 APK / Malware Sideloading Attempts (+60 pts)
+    # 4.13 APK / Malware Sideloading Attempts (+60 pts)
     # Huge threat vector in India: Links prompting to download .apk files directly
     apk_pattern = r'\.apk\b|download the app to your phone|install the application manually'
     if re.search(apk_pattern, lower_text):
