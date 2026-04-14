@@ -4,255 +4,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TrustShield Scam Detector</title>
+    <title>TrustShield | Threat Intelligence</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #09090b; /* Deep zinc/black */
+            color: #e4e4e7;
+        }
+
+        .font-mono {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
         .fade-in {
-            animation: fadeIn 0.4s ease-out forwards;
+            animation: fadeIn 0.5s ease-out forwards;
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .result-container {
-            min-height: 200px;
-        }
+        /* Custom Scrollbar for dark theme */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #09090b; }
+        ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
 
-        /* Dashboard scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease-out; }
 
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #c7d2fe;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #818cf8;
-        }
-
-        /* Hide tabs smoothly */
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease-out;
+        /* Glowing background dots to match your image */
+        .glow-dot {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background-color: #f43f5e; /* Rose/Red color */
+            border-radius: 50%;
+            box-shadow: 0 0 15px 4px rgba(244, 63, 94, 0.4);
+            opacity: 0.6;
         }
     </style>
 </head>
 
-<body
-    class="bg-gradient-to-br from-slate-50 to-indigo-50 h-screen font-sans antialiased text-slate-800 flex overflow-hidden">
+<body class="h-screen flex overflow-hidden relative selection:bg-rose-500/30">
 
-    <!-- Sidebar Dashboard Layout -->
-    <aside
-        class="w-72 bg-white shadow-2xl shadow-indigo-200/50 flex flex-col z-10 border-r border-indigo-50 relative hidden md:flex">
-        <div class="p-8 border-b border-indigo-50">
-            <h1 class="text-2xl font-extrabold text-indigo-950 flex items-center gap-2">
-                <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
-                    </path>
+    <div class="absolute top-20 left-1/4 w-96 h-96 bg-rose-600/10 rounded-full blur-[120px] pointer-events-none"></div>
+    <div class="absolute bottom-0 right-1/4 w-[500px] h-[500px] bg-indigo-600/5 rounded-full blur-[150px] pointer-events-none"></div>
+    
+    <div class="glow-dot top-[10%] left-[20%]"></div>
+    <div class="glow-dot top-[40%] right-[30%] opacity-30 w-2 h-2"></div>
+    <div class="glow-dot bottom-[20%] left-[40%] opacity-40"></div>
+
+    <aside class="w-20 md:w-64 bg-zinc-950/80 backdrop-blur-xl border-r border-zinc-800/50 flex flex-col z-10 transition-all">
+        <div class="p-6 border-b border-zinc-800/50 flex items-center justify-center md:justify-start gap-3">
+            <div class="w-8 h-8 rounded bg-rose-500 shadow-[0_0_15px_rgba(244,63,94,0.4)] flex items-center justify-center">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
                 </svg>
-                TrustShield
-            </h1>
-            <p class="text-xs text-slate-400 mt-2 tracking-widest uppercase font-semibold">Scam Detector</p>
+            </div>
+            <span class="text-xl font-bold text-white hidden md:block tracking-tight">TrustShield</span>
         </div>
 
-        <nav class="p-6 flex-1 space-y-2">
-            <!-- Sidebar Navigation Links -->
-            <button onclick="switchTab('sms-tab-content', this)"
-                class="w-full flex items-center gap-4 px-4 py-3 rounded-xl border border-transparent transition-all bg-indigo-50 text-indigo-700 font-bold tab-btn">
+        <nav class="p-4 flex-1 space-y-2">
+            <button onclick="switchTab('sms-tab-content', this)" class="w-full flex items-center justify-center md:justify-start gap-3 px-4 py-3 rounded-xl border border-zinc-700/50 bg-zinc-800/50 text-white font-medium tab-btn transition-all">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path
-                        d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z">
-                    </path>
+                    <path d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
                 </svg>
-                SMS Scanner
+                <span class="hidden md:block">SMS Scanner</span>
             </button>
 
-            <button onclick="switchTab('email-tab-content', this)"
-                class="w-full flex items-center gap-4 px-4 py-3 rounded-xl border border-transparent transition-all text-slate-500 hover:bg-slate-50 font-medium tab-btn">
+            <button onclick="switchTab('email-tab-content', this)" class="w-full flex items-center justify-center md:justify-start gap-3 px-4 py-3 rounded-xl border border-transparent text-zinc-400 hover:bg-zinc-800/30 hover:text-zinc-200 font-medium tab-btn transition-all">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path
-                        d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
-                    </path>
+                    <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
                 </svg>
-                Email Shield
+                <span class="hidden md:block">Email Shield</span>
             </button>
         </nav>
-
-        <div class="p-6 border-t border-indigo-50 bg-slate-50/50">
-            <p class="text-xs text-slate-400">Detection Engine v3.0.0<br>Rules-Based System</p>
-        </div>
     </aside>
 
-    <!-- Mobile Header -->
-    <header
-        class="md:hidden bg-indigo-900 w-full py-4 px-6 shadow-md flex justify-between items-center fixed top-0 z-20">
-        <div class="flex items-center gap-2">
-            <svg class="w-6 h-6 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
-                </path>
-            </svg>
-            <h1 class="text-xl font-bold text-white">TrustShield</h1>
-        </div>
-        <div class="flex gap-2">
-            <button onclick="switchTab('sms-tab-content', this)"
-                class="px-3 py-1 bg-indigo-600 text-white rounded font-medium text-sm tab-btn-mobile ring-2 ring-indigo-400">SMS</button>
-            <button onclick="switchTab('email-tab-content', this)"
-                class="px-3 py-1 bg-indigo-800 text-indigo-200 rounded font-medium text-sm tab-btn-mobile">Email</button>
-        </div>
-    </header>
+    <main class="flex-1 overflow-y-auto w-full relative z-10 p-4 md:p-8">
+        <div class="max-w-5xl mx-auto space-y-8">
 
-    <!-- Main Content Area -->
-    <main class="flex-1 overflow-y-auto w-full pt-20 md:pt-0 relative">
-        <div
-            class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5 pointer-events-none">
-        </div>
-
-        <div class="max-w-4xl mx-auto px-4 sm:px-8 py-8 md:py-12 relative">
-
-            <!-- SMS Scanner Tab Content -->
             <div id="sms-tab-content" class="tab-content active">
-                <div
-                    class="bg-white rounded-3xl shadow-xl shadow-indigo-100 p-8 relative overflow-hidden border border-white">
-                    <div class="mb-8">
-                        <h2 class="text-3xl font-bold text-indigo-950 mb-2">SMS & Chat Scanner</h2>
-                        <p class="text-slate-500">Check your text messages for urgent warnings, dangerous links, OTP
-                            scams, and suspicious tracking issues.</p>
+                <div class="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800/60 p-6 md:p-8 shadow-2xl">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-white mb-1">Analyze Message</h2>
+                        <p class="text-zinc-400 text-sm">Enter suspicious text or links to scan for threats.</p>
                     </div>
-
-                    <form id="sms-form" class="space-y-6">
-                        <textarea id="sms-input" rows="5"
-                            class="w-full bg-slate-50 border border-indigo-100 rounded-2xl p-5 text-slate-700 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 focus:outline-none transition-all resize-none text-lg"
-                            placeholder="Paste suspicious SMS here...&#10;(e.g., URGENT: Your packet is suspended! Verify at http://spam.com)"
-                            required></textarea>
-
-                        <button type="submit" id="sms-submit-btn"
-                            class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-8 py-4 w-full transition-all shadow-lg shadow-indigo-600/20 flex justify-center items-center gap-2 group">
-                            Scan Message <span class="group-hover:translate-x-1 transition-transform">&rarr;</span>
+                    <form id="sms-form" class="space-y-4">
+                        <textarea id="sms-input" rows="4" class="w-full bg-zinc-950/50 border border-zinc-800 rounded-xl p-4 text-zinc-200 placeholder:text-zinc-600 focus:ring-1 focus:ring-rose-500 focus:border-rose-500 focus:outline-none transition-all resize-none font-mono text-sm" placeholder="> Paste payload here..." required></textarea>
+                        <button type="submit" id="sms-submit-btn" class="bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-xl px-6 py-3 transition-all shadow-[0_0_15px_rgba(225,29,72,0.3)] flex items-center gap-2">
+                            Initialize Scan
                         </button>
                     </form>
                 </div>
             </div>
 
-            <!-- Email Shield Tab Content -->
             <div id="email-tab-content" class="tab-content">
-                <div
-                    class="bg-white rounded-3xl shadow-xl shadow-indigo-100 p-8 relative overflow-hidden border border-white">
-                    <div class="mb-8">
-                        <h2 class="text-3xl font-bold text-indigo-950">Email Shield</h2>
-                        <p class="text-slate-500">Check business and personal emails for Job Bait, fake authorities, and
-                            Pay-to-Play Internships.</p>
+                <div class="bg-zinc-900/40 backdrop-blur-md rounded-2xl border border-zinc-800/60 p-6 md:p-8 shadow-2xl">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-white mb-1">Email Shield Header</h2>
+                        <p class="text-zinc-400 text-sm">Analyze sender headers and body content for phishing.</p>
                     </div>
-
-                    <form id="email-form" class="space-y-5">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            <div>
-                                <label class="block text-sm font-bold text-indigo-900 mb-2">Sender Address</label>
-                                <input type="email" id="email-sender"
-                                    class="w-full bg-slate-50 border border-indigo-100 rounded-xl p-3 text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                    placeholder="e.g. hr@fake-company.com" required>
-                            </div>
-                            <div>
-                                <label class="block text-sm font-bold text-indigo-900 mb-2">Subject Line</label>
-                                <input type="text" id="email-subject"
-                                    class="w-full bg-slate-50 border border-indigo-100 rounded-xl p-3 text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
-                                    placeholder="e.g. Shortlisted for Internship">
-                            </div>
+                    <form id="email-form" class="space-y-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <input type="email" id="email-sender" class="w-full bg-zinc-950/50 border border-zinc-800 rounded-xl p-3 text-zinc-200 placeholder:text-zinc-600 focus:ring-1 focus:ring-rose-500 focus:outline-none font-mono text-sm" placeholder="Sender: fake@domain.com" required>
+                            <input type="text" id="email-subject" class="w-full bg-zinc-950/50 border border-zinc-800 rounded-xl p-3 text-zinc-200 placeholder:text-zinc-600 focus:ring-1 focus:ring-rose-500 focus:outline-none font-mono text-sm" placeholder="Subject: Urgent action required">
                         </div>
-                        <div>
-                            <label class="block text-sm font-bold text-indigo-900 mb-2">Email Body</label>
-                            <textarea id="email-body" rows="6"
-                                class="w-full bg-slate-50 border border-indigo-100 rounded-xl p-4 text-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none"
-                                placeholder="Paste full email contents here..." required></textarea>
-                        </div>
-                        <button type="submit" id="email-submit-btn"
-                            class="bg-indigo-900 hover:bg-slate-900 text-white font-bold rounded-xl px-8 py-4 w-full transition-all shadow-lg flex justify-center items-center gap-2 group">
-                            Analyze Email <span class="group-hover:translate-x-1 transition-transform">&rarr;</span>
+                        <textarea id="email-body" rows="4" class="w-full bg-zinc-950/50 border border-zinc-800 rounded-xl p-4 text-zinc-200 placeholder:text-zinc-600 focus:ring-1 focus:ring-rose-500 focus:outline-none resize-none font-mono text-sm" placeholder="> Paste raw email body here..." required></textarea>
+                        <button type="submit" id="email-submit-btn" class="bg-rose-600 hover:bg-rose-500 text-white font-semibold rounded-xl px-6 py-3 transition-all shadow-[0_0_15px_rgba(225,29,72,0.3)] flex items-center gap-2">
+                            Initialize Scan
                         </button>
                     </form>
                 </div>
             </div>
 
-            <!-- Global Result Area -->
-            <!-- Loading Spinner -->
-            <div id="loading" class="hidden flex-col justify-center items-center py-16">
-                <div class="animate-spin rounded-full h-12 w-12 border-b-4 border-indigo-600 mb-4"></div>
-                <span class="text-indigo-900 font-medium tracking-wide">Analyzing your message...</span>
+            <div id="loading" class="hidden flex-col justify-center items-center py-12">
+                <div class="w-12 h-12 border-2 border-zinc-800 border-t-rose-500 rounded-full animate-spin mb-4"></div>
+                <span class="text-rose-500 font-mono text-sm tracking-widest uppercase">Analyzing Vectors...</span>
             </div>
 
-            <!-- Dynamic Results -->
-            <div id="results-area" class="mt-8 hidden fade-in">
-                <div id="result-box"
-                    class="rounded-3xl p-8 transition-colors duration-500 border border-transparent shadow-xl relative overflow-hidden">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-                        <div>
-                            <h3 class="text-xs font-bold uppercase tracking-widest mb-2 opacity-70">Final Result</h3>
-                            <div class="text-4xl md:text-5xl font-black tracking-tight" id="status-text">SAFE</div>
+            <div id="results-area" class="hidden fade-in">
+                <div class="bg-[#121214] border border-zinc-800/80 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row gap-8 shadow-2xl relative overflow-hidden">
+                    
+                    <div class="md:w-1/3 border-b md:border-b-0 md:border-r border-zinc-800/80 pb-8 md:pb-0 md:pr-8 flex flex-col items-center md:items-start">
+                        <div class="flex items-center gap-2 text-zinc-400 mb-8">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                            <span class="font-medium text-sm">Risk analysis</span>
                         </div>
-                        <div class="mt-4 md:mt-0 md:text-right w-full md:w-auto">
-                            <h3 class="text-xs font-bold uppercase tracking-widest mb-2 opacity-70">Risk Score</h3>
-                            <div class="text-6xl font-mono font-bold tracking-tighter" id="score-text">0<span
-                                    class="text-3xl opacity-50">/100</span></div>
+
+                        <div class="relative flex justify-center items-center w-48 h-48 mb-6">
+                            <svg class="w-full h-full transform -rotate-90">
+                                <circle cx="96" cy="96" r="80" stroke="#27272a" stroke-width="12" fill="transparent" />
+                                <circle id="score-circle" cx="96" cy="96" r="80" stroke="#f43f5e" stroke-width="12" fill="transparent" stroke-dasharray="502" stroke-dashoffset="502" class="transition-all duration-1000 ease-out" stroke-linecap="round" />
+                            </svg>
+                            <div class="absolute flex flex-col items-center">
+                                <span id="score-text" class="text-5xl font-light text-rose-500">0%</span>
+                                <span id="status-text" class="text-xs font-bold uppercase tracking-widest text-zinc-500 mt-1">SAFE</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3 w-full">
+                            <div class="bg-zinc-900/50 rounded-lg p-3 border border-zinc-800/50">
+                                <span class="text-xs text-zinc-500 font-medium">Confidence</span>
+                                <div class="text-lg text-white font-mono mt-1">98%</div>
+                            </div>
+                            <div class="bg-zinc-900/50 rounded-lg p-3 border border-zinc-800/50">
+                                <span class="text-xs text-zinc-500 font-medium">Flags</span>
+                                <div id="flag-count" class="text-lg text-amber-500 font-mono mt-1 flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                    0
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Progress Bar -->
-                    <div class="w-full bg-black/10 rounded-full h-3 mb-10 overflow-hidden">
-                        <div id="score-bar" class="h-3 rounded-full transition-all duration-1000 ease-out"
-                            style="width: 0%; background-color: currentColor;"></div>
-                    </div>
+                    <div class="md:w-2/3 flex flex-col justify-center">
+                        <h3 class="text-lg font-semibold text-white mb-6 border-b border-zinc-800/80 pb-2">Detection Dashboard</h3>
+                        
+                        <div class="space-y-6">
+                            <div>
+                                <h4 class="text-xs uppercase tracking-widest text-zinc-500 mb-3">Identified Vectors</h4>
+                                <ul id="categories-list" class="space-y-3"></ul>
+                                <p id="no-categories" class="text-sm text-zinc-600 font-mono hidden">> System clear. No threat vectors matched.</p>
+                            </div>
 
-                    <!-- Details Box -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="bg-white/40 p-6 rounded-2xl border border-white/60">
-                            <h4 class="font-bold mb-4 flex items-center gap-2 text-indigo-950">
-                                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path
-                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
-                                    </path>
-                                </svg>
-                                Threat Types Found
-                            </h4>
-                            <ul id="categories-list"
-                                class="space-y-2 text-sm text-slate-800 font-medium pl-1 list-none"></ul>
-                            <p id="no-categories" class="text-sm opacity-60 italic hidden text-slate-700">No common scam
-                                types found.</p>
-                        </div>
-                        <div class="bg-white/40 p-6 rounded-2xl border border-white/60">
-                            <h4 class="font-bold mb-4 flex items-center gap-2 text-indigo-950">
-                                <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2"
-                                    viewBox="0 0 24 24">
-                                    <path
-                                        d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9">
-                                    </path>
-                                </svg>
-                                Suspicious Signs
-                            </h4>
-                            <ul id="flags-list" class="space-y-2 text-sm text-slate-800 font-medium pl-1 list-none">
-                            </ul>
-                            <p id="no-flags" class="text-sm opacity-60 italic hidden text-slate-700">No suspicious
-                                formatting found.</p>
+                            <div>
+                                <h4 class="text-xs uppercase tracking-widest text-zinc-500 mb-3">Telemetry Anomalies</h4>
+                                <ul id="flags-list" class="space-y-3"></ul>
+                                <p id="no-flags" class="text-sm text-zinc-600 font-mono hidden">> Syntax and routing appear standard.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -261,48 +186,24 @@
         </div>
     </main>
 
-    <!-- Custom Script Logic -->
     <script>
-        // --- 1. Tab Switching Logic ---
+        // --- Tab Logic ---
         function switchTab(tabId, btnElement) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.getElementById(tabId).classList.add('active');
 
             document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('bg-indigo-50', 'text-indigo-700', 'font-bold');
-                btn.classList.add('text-slate-500', 'hover:bg-slate-50', 'font-medium');
+                btn.classList.remove('border-zinc-700/50', 'bg-zinc-800/50', 'text-white');
+                btn.classList.add('border-transparent', 'text-zinc-400');
             });
 
-            document.querySelectorAll('.tab-btn-mobile').forEach(btn => {
-                btn.classList.remove('bg-indigo-600', 'text-white', 'ring-2', 'ring-indigo-400');
-                btn.classList.add('bg-indigo-800', 'text-indigo-200');
-            });
-
-            if (btnElement.classList.contains('tab-btn')) {
-                btnElement.classList.remove('text-slate-500', 'hover:bg-slate-50', 'font-medium');
-                btnElement.classList.add('bg-indigo-50', 'text-indigo-700', 'font-bold');
-
-                const mobileBtns = document.querySelectorAll('.tab-btn-mobile');
-                if (tabId === 'sms-tab-content') { mobileBtns[0].classList.add('bg-indigo-600', 'text-white', 'ring-2', 'ring-indigo-400'); mobileBtns[0].classList.remove('bg-indigo-800', 'text-indigo-200'); }
-                if (tabId === 'email-tab-content') { mobileBtns[1].classList.add('bg-indigo-600', 'text-white', 'ring-2', 'ring-indigo-400'); mobileBtns[1].classList.remove('bg-indigo-800', 'text-indigo-200'); }
-            }
-
-            if (btnElement.classList.contains('tab-btn-mobile')) {
-                btnElement.classList.remove('bg-indigo-800', 'text-indigo-200');
-                btnElement.classList.add('bg-indigo-600', 'text-white', 'ring-2', 'ring-indigo-400');
-
-                const desktopBtns = document.querySelectorAll('.tab-btn');
-                if (tabId === 'sms-tab-content') { desktopBtns[0].classList.add('bg-indigo-50', 'text-indigo-700', 'font-bold'); desktopBtns[0].classList.remove('text-slate-500', 'hover:bg-slate-50', 'font-medium'); }
-                if (tabId === 'email-tab-content') { desktopBtns[1].classList.add('bg-indigo-50', 'text-indigo-700', 'font-bold'); desktopBtns[1].classList.remove('text-slate-500', 'hover:bg-slate-50', 'font-medium'); }
-            }
-
+            btnElement.classList.remove('border-transparent', 'text-zinc-400');
+            btnElement.classList.add('border-zinc-700/50', 'bg-zinc-800/50', 'text-white');
+            
             document.getElementById('results-area').classList.add('hidden');
         }
 
-        // --- 2. API Submission Architecture ---
-
-        // ⚠️ REPLACE THIS WITH YOUR ACTUAL RENDER BACKEND URL ⚠️
-        // Example: 'https://trustshield-backend.onrender.com'
+        // --- Processing Logic ---
         const API_BASE_URL = 'https://ai-scam-detection.onrender.com';
 
         const setProcessingState = (isLoading) => {
@@ -313,33 +214,45 @@
             if (isLoading) {
                 loadingEl.style.display = 'flex';
                 resultsEl.classList.add('hidden');
-                submitBtns.forEach(b => { b.disabled = true; b.classList.add('opacity-50'); });
+                submitBtns.forEach(b => { b.disabled = true; b.classList.add('opacity-50', 'cursor-not-allowed'); });
             } else {
                 loadingEl.style.display = 'none';
                 resultsEl.classList.remove('hidden');
-                submitBtns.forEach(b => { b.disabled = false; b.classList.remove('opacity-50'); });
+                submitBtns.forEach(b => { b.disabled = false; b.classList.remove('opacity-50', 'cursor-not-allowed'); });
             }
         };
 
         const renderResults = (data) => {
+            // Update Text
             document.getElementById('status-text').textContent = data.status;
-            document.getElementById('score-text').innerHTML = `${data.risk_score}<span class="text-3xl opacity-50">/100</span>`;
-
-            const scoreBar = document.getElementById('score-bar');
-            scoreBar.style.width = '0%';
-            setTimeout(() => { scoreBar.style.width = `${data.risk_score}%`; }, 50);
-
-            const resultBox = document.getElementById('result-box');
-            resultBox.className = 'rounded-3xl p-8 transition-colors duration-500 border relative overflow-hidden shadow-2xl';
-
+            document.getElementById('score-text').textContent = `${data.risk_score}%`;
+            
+            // Calculate SVG Circle Dash Offset (502 is circumference)
+            const circle = document.getElementById('score-circle');
+            const offset = 502 - (502 * data.risk_score) / 100;
+            
+            // Color Logic based on risk
+            const statusText = document.getElementById('status-text');
+            const scoreText = document.getElementById('score-text');
+            
             if (data.status === 'SAFE') {
-                resultBox.classList.add('bg-emerald-50', 'text-emerald-900', 'border-emerald-200', 'shadow-emerald-100');
+                circle.setAttribute('stroke', '#10b981'); // Emerald
+                scoreText.className = 'text-5xl font-light text-emerald-500';
+                statusText.className = 'text-xs font-bold uppercase tracking-widest text-emerald-600 mt-1';
             } else if (data.status === 'SUSPICIOUS') {
-                resultBox.classList.add('bg-amber-50', 'text-amber-900', 'border-amber-200', 'shadow-amber-100');
+                circle.setAttribute('stroke', '#f59e0b'); // Amber
+                scoreText.className = 'text-5xl font-light text-amber-500';
+                statusText.className = 'text-xs font-bold uppercase tracking-widest text-amber-600 mt-1';
             } else {
-                resultBox.classList.add('bg-rose-50', 'text-rose-900', 'border-rose-200', 'shadow-rose-100');
+                circle.setAttribute('stroke', '#f43f5e'); // Rose/Red
+                scoreText.className = 'text-5xl font-light text-rose-500';
+                statusText.className = 'text-xs font-bold uppercase tracking-widest text-rose-600 mt-1';
             }
 
+            // Animate Circle
+            setTimeout(() => { circle.style.strokeDashoffset = offset; }, 50);
+
+            // Render Lists
             const renderList = (arrayData, listId, emptyId) => {
                 const listEl = document.getElementById(listId);
                 const emptyEl = document.getElementById(emptyId);
@@ -350,7 +263,8 @@
                     listEl.classList.remove('hidden');
                     arrayData.forEach(item => {
                         const li = document.createElement('li');
-                        li.innerHTML = `<span class="inline-block mr-2 font-black opacity-30">&rarr;</span> ${item}`;
+                        li.className = "flex items-center gap-3 text-sm text-zinc-300 bg-zinc-900/30 p-2 rounded border border-zinc-800/50";
+                        li.innerHTML = `<span class="text-rose-500 font-mono text-xs">></span> ${item}`;
                         listEl.appendChild(li);
                     });
                 } else {
@@ -361,11 +275,15 @@
 
             renderList(data.threat_categories, 'categories-list', 'no-categories');
             renderList(data.flags_found, 'flags-list', 'no-flags');
+            
+            // Update Flag Count
+            document.getElementById('flag-count').innerHTML = `
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                ${data.flags_found ? data.flags_found.length : 0}
+            `;
         };
 
-        // --- Event Listeners ---
-
-        // SMS Handler sending type="sms"
+        // --- API Submission ---
         document.getElementById('sms-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const payloadText = document.getElementById('sms-input').value;
@@ -377,45 +295,44 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text: payloadText, type: "sms" })
                 });
+                
                 if (!response.ok) throw new Error('Network Error');
                 const data = await response.json();
+                
                 renderResults(data);
             } catch (err) {
-                alert("Backend API is unreachable.");
+                alert("System offline. Backend connection failed.");
             } finally {
                 setProcessingState(false);
             }
         });
 
-        // Email Handler sending combined text and type="email"
         document.getElementById('email-form').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
             const sender = document.getElementById('email-sender').value;
             const subject = document.getElementById('email-subject').value;
             const body = document.getElementById('email-body').value;
-
-            // Combine fields to send to the unified engine
             const combinedText = `Email Sender: ${sender}\nEmail Subject: ${subject}\n\n${body}`;
-
+            
             setProcessingState(true);
-
             try {
                 const response = await fetch(`${API_BASE_URL}/analyze`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ text: combinedText, type: "email" })
                 });
+                
                 if (!response.ok) throw new Error('Network Error');
                 const data = await response.json();
+                
                 renderResults(data);
             } catch (err) {
-                alert("Backend API is unreachable.");
+                alert("System offline. Backend connection failed.");
             } finally {
                 setProcessingState(false);
             }
         });
-
     </script>
 </body>
-
 </html>
